@@ -1,0 +1,5 @@
+#!/Users/zineeddine/Desktop/RealTimeDevOps_Project_Pipeline/venv/bin/python3.11
+
+import pydoc
+if __name__ == '__main__':
+    pydoc.cli()
