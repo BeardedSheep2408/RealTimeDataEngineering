@@ -1,16 +1,19 @@
 import pendulum
+import requests
+import json
+import time
 
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
+from kafka import KafkaProducer
+
 
 default_args = {
     'owner': 'airscholar',
-    'start_date': pendulum.datetime(2024, 11, 6, 10, 00)
+    'start_date': pendulum.datetime(2024, 11, 6, 10, 0)
 }
 
 def get_data():
-    import requests
-
     res = requests.get('https://randomuser.me/api/')
     res = res.json()
     res = res['results'][0]
@@ -36,20 +39,13 @@ def format_data(res):
     return data
 
 def stream_data():
-    import json
-    from kafka import KafkaProducer
-    import time
-
     res = get_data()
     res = format_data(res)
     
     print(json.dumps(res, indent = 3))
 
-    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], max_block_ms=5000)
-
+    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], max_block_ms=5000, max_request_size=1000000, compression_type='gzip')
     producer.send('users_created', json.dumps(res).encode('utf-8'))
-
-
 
 
 with DAG('user_automation',
@@ -61,5 +57,6 @@ with DAG('user_automation',
         task_id='stream_data_from_api',
         python_callable=stream_data
     )
-    
-stream_data()
+
+for _ in range(8):  
+    stream_data()

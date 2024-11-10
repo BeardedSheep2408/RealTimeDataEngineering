@@ -1,5 +1,5 @@
-==> 2024-11-07 17:59:23 <==
-# cmd: /Users/zineeddine/anaconda3/bin/conda create -p venv python==3.11.5 -y
+==> 2024-11-10 08:23:14 <==
+# cmd: /Users/zineeddine/anaconda3/bin/conda create -p venv python==3.11.5
 # conda version: 23.7.4
 +defaults/noarch::tzdata-2024b-h04d1e81_0
 +defaults/osx-arm64::bzip2-1.0.8-h80987f9_6
