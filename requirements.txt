@@ -2,3 +2,6 @@ apache-airflow
 kafka-python
 pendulum
 psycopg2-binary
+cassandra-driver
+spark
+pyspark
