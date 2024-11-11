@@ -2,6 +2,8 @@ import pendulum
 import requests
 import json
 import time
+import logging
+
 
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
@@ -39,14 +41,21 @@ def format_data(res):
     return data
 
 def stream_data():
-    res = get_data()
-    res = format_data(res)
-    
-    print(json.dumps(res, indent = 3))
 
-    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], max_block_ms=5000, max_request_size=1000000, compression_type='gzip')
-    producer.send('users_created', json.dumps(res).encode('utf-8'))
+    producer = KafkaProducer(bootstrap_servers=['broker:29092'], max_block_ms=5000, max_request_size=1000000, compression_type='gzip')
+    curr_time = time.time()
 
+    while True:
+        if time.time() > curr_time + 10:
+            break
+        try:
+            res = get_data()
+            res = format_data(res)
+            print(json.dumps(res, indent = 3))
+            producer.send('users_created', json.dumps(res).encode('utf-8'))
+        except Exception as e:
+            logging.error(f'An error occured: {e}')
+            continue
 
 with DAG('user_automation',
          default_args=default_args,
@@ -57,6 +66,3 @@ with DAG('user_automation',
         task_id='stream_data_from_api',
         python_callable=stream_data
     )
-
-for _ in range(8):  
-    stream_data()
